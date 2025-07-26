@@ -1,0 +1,116 @@
+# 📌 Import Libraries
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_auc_score
+
+# 📥 Load Dataset
+df = pd.read_csv(r"C:\Users\poona\Downloads\archive (1)\WA_Fn-UseC_-Telco-Customer-Churn.csv")
+print("Dataset Shape:", df.shape)
+df.head()
+
+# 📌 Clean column names
+df.columns = df.columns.str.strip()
+
+# ✅ Print columns to understand structure
+print("Available Columns BEFORE drop:", df.columns.tolist())
+
+# ✅ Safely drop customerID or similar columns without crashing
+df.drop(columns=[col for col in df.columns if "customer" in col.lower()], inplace=True, errors='ignore')
+
+# ✅ Print columns after drop
+print("Available Columns AFTER drop:", df.columns.tolist())
+
+# ✅ Convert TotalCharges to numeric (some rows have empty strings)
+df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
+
+# ✅ Drop rows with missing values in TotalCharges
+df.dropna(inplace=True)
+
+# ✅ Encode Churn column (target variable)
+df["Churn"] = df["Churn"].map({"Yes": 1, "No": 0})
+
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load dataset
+df = pd.read_csv(r"C:\Users\poona\Downloads\archive (1)\WA_Fn-UseC_-Telco-Customer-Churn.csv")
+
+# Clean column names
+df.columns = df.columns.str.strip()
+
+# Drop customerID if it exists
+df.drop(columns=[col for col in df.columns if "customer" in col.lower()], inplace=True, errors="ignore")
+
+# Convert TotalCharges to numeric
+df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
+
+# Drop rows with missing values
+df.dropna(inplace=True)
+
+# Re-encode Churn properly
+if df["Churn"].dtype == "object":
+    df["Churn"] = df["Churn"].map({"Yes": 1, "No": 0})
+
+# Drop rows with missing or unrecognized churn values
+df = df[df["Churn"].isin([0, 1])]
+
+# ✅ Now try the plot
+sns.countplot(x="Churn", data=df)
+plt.title("Churn Distribution")
+plt.show()
+
+# ✅ Correlation heatmap
+plt.figure(figsize=(10, 6))
+sns.heatmap(df.corr(numeric_only=True), annot=True, cmap="coolwarm")
+plt.title("Correlation Matrix")
+plt.show()
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
+
+# Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train
+lr = LogisticRegression(max_iter=1000)
+lr.fit(X_train, y_train)
+
+rf = RandomForestClassifier()
+rf.fit(X_train, y_train)
+
+# Predict
+y_pred_lr = lr.predict(X_test)
+y_pred_rf = rf.predict(X_test)
+
+# Evaluate
+print("Logistic Regression Accuracy:", accuracy_score(y_test, y_pred_lr))
+print("Random Forest Accuracy:", accuracy_score(y_test, y_pred_rf))
+print("Random Forest Confusion Matrix:\n", confusion_matrix(y_test, y_pred_rf))
+print("Random Forest ROC AUC Score:", roc_auc_score(y_test, rf.predict_proba(X_test)[:, 1]))
+
+
+print("Churn column exists:", "Churn" in df.columns)
+print("Churn unique values:", df["Churn"].unique())
+print("Churn value counts:\n", df["Churn"].value_counts())
+
+# Feature importance from Random Forest
+features = df_encoded.drop("Churn", axis=1).columns
+importances = rf.feature_importances_
+
+# Plot
+importance_df = pd.DataFrame({'Feature': features, 'Importance': importances})
+importance_df = importance_df.sort_values("Importance", ascending=False)
+
+plt.figure(figsize=(10, 6))
+sns.barplot(x="Importance", y="Feature", data=importance_df.head(10))
+plt.title("Top 10 Important Features (Random Forest)")
+plt.show()
